@@ -5,7 +5,6 @@ SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 #ファイルがなければ作成
 ! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
 
-
 #pathの正規化
 # 1. ホームディレクトリは~に変更
 # 2. 存在しない場合はエラーにする
@@ -15,17 +14,17 @@ __sh_bookmark::normalizedPath ()
     echo "no such file or directory";
     exit 1;
   fi
-  builtin cd `dirname $1`
+  local bookmarkPath=`builtin cd $1 && pwd`
 
-  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${PWD}"; then
-    echo "already,this path is registed";
-    kill -INT $$
+  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${bookmarkPath}" > /dev/null; then
+    echo "already,this bookmark path is registed";
+    exit 2;
   fi
 
-  if echo ${PWD} | grep "^${HOME}"; then
-    return ${PWD}
+  if echo ${bookmarkPath} | grep \"^${HOME}\" > /dev/null; then
+    echo ${bookmarkPath}
   else
-    return `echo ${PWD} | sed "s;^${HOME};~;"`
+    echo ${bookmarkPath} | sed "s;^"${HOME}";~;"
   fi
 }
 
