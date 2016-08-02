@@ -47,10 +47,11 @@ __sh_bookmark::makeId ()
   do
     $counter = $counter + 1
     if [ $counter -gt 99 ]; then
-      echo "too many similar id:${pathInicial}"; exit 1;
+      echo "too many similar id:${pathInicial}";
+      exit 1;
     fi
   done
-  return printf "%-15s|" "${pathInicial}${counter}"
+  printf "%-15s|" "${pathInicial}${counter}"
 }
 
 # bookmarkを追加
