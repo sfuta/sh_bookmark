@@ -11,21 +11,22 @@ SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 __sh_bookmark::normalizedPath ()
 {
   if ! [ -d $1 ]; then
-    echo "no such file or directory";
-    exit 1;
+    echo "no such file or directory" >&2;
+    return 1;
   fi
   local bookmarkPath=`builtin cd $1 && pwd`
-
-  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${bookmarkPath}" > /dev/null; then
-    echo "already,this bookmark path is registed";
-    exit 1;
-  fi
+  local normalizedPath="";
 
   if echo ${bookmarkPath} | grep \"^${HOME}\" > /dev/null; then
-    echo ${bookmarkPath}
+    normalizedPath=`echo ${bookmarkPath}`
   else
-    echo ${bookmarkPath} | sed "s;^"${HOME}";~;"
+    normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`
   fi
+  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${normalizedPath}" > /dev/null; then
+    echo "already,this bookmark path is registed" >&2;
+    return 1;
+  fi
+  echo ${normalizedPath}
 }
 
 #idの存在チェック
@@ -35,20 +36,20 @@ __sh_bookmark::isExistId ()
 }
 
 #bookmark idを作成
-# 1. 最大13文字
+# 1. 最大20文字
 # 2. 各階層の先頭文字で作成(日本語の場合はローマ字)
 # 3. 名前が重複した場合はシーケンス番号を追加
 # 4. ホームディレクトリは「~」で登録
 __sh_bookmark::makeId ()
 {
-  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-13`
+  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-20`
   local counter=0
   while __sh_bookmark::isExistId "${pathInicial}:${counter}"
   do
     counter=`expr $counter + 1`
     if [ $counter -gt 99 ]; then
-      echo "too many similar id:${pathInicial}";
-      exit 1;
+      echo "too many similar id ${pathInicial}:n" >&2;
+      return 1;
     fi
   done
   echo "${pathInicial}:${counter}"
@@ -62,8 +63,12 @@ __sh_bookmark::add ()
   else
     local bookmarkPath=`__sh_bookmark::normalizedPath $1`
   fi
+  [ -z $bookmarkPath ] && return 1
+
   local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
-  printf "%-15s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
+  [ -z $bookmarkId ] && return 1
+
+  printf "%-23s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
 }
 
 # bookmarkを表示(peco使用)
