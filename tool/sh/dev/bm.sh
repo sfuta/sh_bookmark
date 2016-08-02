@@ -22,7 +22,7 @@ __sh_bookmark::normalizedPath ()
   else
     normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`
   fi
-  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${normalizedPath}" > /dev/null; then
+  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep -Fx "${normalizedPath}" > /dev/null; then
     echo "already,this bookmark path is registed" >&2;
     return 1;
   fi
@@ -65,7 +65,11 @@ __sh_bookmark::add ()
   fi
   [ -z $bookmarkPath ] && return 1
 
-  local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
+  if [ -z $2 ]; then
+    local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
+  else
+    local bookmarkId=`echo $2`
+  fi
   [ -z $bookmarkId ] && return 1
 
   printf "%-23s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
