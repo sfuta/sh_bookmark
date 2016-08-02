@@ -2,12 +2,14 @@
 
 SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 
-#ファイルがなければ作成
+#create file to save bookmark data
 ! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
 
-#pathの正規化
-# 1. ホームディレクトリは~に変更
-# 2. 存在しない場合はエラーにする
+#formated path ($HOME -> ~)
+# e.g. $HOME/workspace -> ~/workspace
+#
+# @param  $1 path
+# @return formated path
 __sh_bookmark::normalizedPath ()
 {
   if ! [ -d $1 ]; then
@@ -29,17 +31,22 @@ __sh_bookmark::normalizedPath ()
   echo ${normalizedPath}
 }
 
-#idの存在チェック
+#exist check for bookmark id
+#
+# @param  $1 bookmark id
+# @return nothing
 __sh_bookmark::isExistId ()
 {
   cut -d "|" -f1 ${SH_BOOKMARKS_FILE} | tr -d " " | grep -Fx "$1" > /dev/null
 }
 
-#bookmark idを作成
+#create bookmark id
 # 1. 最大20文字
 # 2. 各階層の先頭文字で作成(日本語の場合はローマ字)
 # 3. 名前が重複した場合はシーケンス番号を追加
-# 4. ホームディレクトリは「~」で登録
+#
+# @param  $1 bookmark path
+# @return bookmark id
 __sh_bookmark::makeId ()
 {
   local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-20`
@@ -55,7 +62,11 @@ __sh_bookmark::makeId ()
   echo "${pathInicial}:${counter}"
 }
 
-# bookmarkを追加
+#add bookmark
+#
+# @param  $1 save path(default current dir)
+# @param  $2 save id  (default see __sh_bookmark::makeId())
+# @return nothing
 __sh_bookmark::add ()
 {
   if [ -z $1 ]; then
@@ -75,13 +86,13 @@ __sh_bookmark::add ()
   printf "%-23s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
 }
 
-# bookmarkを表示(peco使用)
+#show bookmark(use peco)
 __sh_bookmark::list ()
 {
 }
 
 
-# bookmarkをreload(未存在なパスを除去)
+#reload bookmark (clean file)
 __sh_bookmark::reload ()
 {
 }
