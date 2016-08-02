@@ -89,10 +89,28 @@ __sh_bookmark::add ()
 #show bookmark(use peco)
 __sh_bookmark::list ()
 {
-}
+  local selectedBookmark=` \
+    cat ${SH_BOOKMARKS_FILE} | sort -n | \
+                        peco | rev     | \
+           cut -d "|" -f 1-1 | rev`
 
+  if [ -n "$selectedBookmark" ]; then
+    BUFFER=$BUFFER" ${selectedBookmark}"
+  fi
+}
 
 #reload bookmark (clean file)
 __sh_bookmark::reload ()
 {
+  local tmpfile=$(mktemp)
+  local bookmarkedPath=""
+
+  while read line
+  do
+    bookmarkedPath=`echo ${line} | rev | cut -d "|" -f1-1 | rev | sed "s;^~;${HOME};"`
+    if [ -d $bookmarkedPath ]; then
+      echo $line >> $tmpfile
+    fi
+  done < ${SH_BOOKMARKS_FILE}
+  command mv -f $tmpfile ${SH_BOOKMARKS_FILE}
 }
