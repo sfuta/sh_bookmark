@@ -31,7 +31,7 @@ __sh_bookmark::normalizedPath ()
 #idの存在チェック
 __sh_bookmark::isExistId ()
 {
-  return cut -d "|" -f1 ${SH_BOOKMARKS_FILE} | grep "$1"
+  [ `cut -d "|" -f1 ${SH_BOOKMARKS_FILE}` = "$1" ]
 }
 
 #bookmark idを作成
