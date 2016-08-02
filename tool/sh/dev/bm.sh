@@ -18,7 +18,7 @@ __sh_bookmark::normalizedPath ()
 
   if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep "${bookmarkPath}" > /dev/null; then
     echo "already,this bookmark path is registed";
-    exit 2;
+    exit 1;
   fi
 
   if echo ${bookmarkPath} | grep \"^${HOME}\" > /dev/null; then
@@ -32,7 +32,6 @@ __sh_bookmark::normalizedPath ()
 __sh_bookmark::isExistId ()
 {
   cut -d "|" -f1 ${SH_BOOKMARKS_FILE} | tr -d " " | grep -Fx "$1" > /dev/null
-  echo $?
 }
 
 #bookmark idを作成
@@ -44,27 +43,27 @@ __sh_bookmark::makeId ()
 {
   local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-13`
   local counter=0
-  while __sh_bookmark::isExistId "${pathInicial}${counter}"
+  while __sh_bookmark::isExistId "${pathInicial}:${counter}"
   do
-    $counter = $counter + 1
+    counter=`expr $counter + 1`
     if [ $counter -gt 99 ]; then
       echo "too many similar id:${pathInicial}";
       exit 1;
     fi
   done
-  echo ${pathInicial}${counter}
+  echo "${pathInicial}:${counter}"
 }
 
 # bookmarkを追加
 __sh_bookmark::add ()
 {
-  if [ -n $1 ]; then
-    local bookmarkPath=`__sh_bookmark::normalizedPath $1`
+  if [ -z $1 ]; then
+    local bookmarkPath=`__sh_bookmark::normalizedPath $PWD`
   else
-    local bookmarkPath=`__sh_bookmark::normalizedPath "."`
+    local bookmarkPath=`__sh_bookmark::normalizedPath $1`
   fi
-  local id=`__sh_bookmark::makeId $bookmarkPath`
-  echo $id$bookmarkPath
+  local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
+  printf "%-15s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
 }
 
 # bookmarkを表示(peco使用)
