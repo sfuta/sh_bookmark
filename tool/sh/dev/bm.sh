@@ -31,7 +31,8 @@ __sh_bookmark::normalizedPath ()
 #idの存在チェック
 __sh_bookmark::isExistId ()
 {
-  [ `cut -d "|" -f1 ${SH_BOOKMARKS_FILE}` = "$1" ]
+  cut -d "|" -f1 ${SH_BOOKMARKS_FILE} | tr -d " " | grep -Fx "$1" > /dev/null
+  echo $?
 }
 
 #bookmark idを作成
@@ -41,7 +42,7 @@ __sh_bookmark::isExistId ()
 # 4. ホームディレクトリは「~」で登録
 __sh_bookmark::makeId ()
 {
-  local pathInicial=`echo "$1" | grep -o "/." | tr -d "\r\n/"`
+  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-13`
   local counter=0
   while __sh_bookmark::isExistId "${pathInicial}${counter}"
   do
@@ -51,19 +52,19 @@ __sh_bookmark::makeId ()
       exit 1;
     fi
   done
-  printf "%-15s|" "${pathInicial}${counter}"
+  echo ${pathInicial}${counter}
 }
 
 # bookmarkを追加
 __sh_bookmark::add ()
 {
   if [ -n $1 ]; then
-    local path=`__sh_bookmark::normalizedPath $1`
+    local bookmarkPath=`__sh_bookmark::normalizedPath $1`
   else
-    local path=`__sh_bookmark::normalizedPath "."`
+    local bookmarkPath=`__sh_bookmark::normalizedPath "."`
   fi
-  local id=`__sh_bookmark::makeId $path`
-  echo $id$path
+  local id=`__sh_bookmark::makeId $bookmarkPath`
+  echo $id$bookmarkPath
 }
 
 # bookmarkを表示(peco使用)
