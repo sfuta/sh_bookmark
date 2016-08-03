@@ -84,19 +84,15 @@ __sh_bookmark::add ()
   [ -z $bookmarkId ] && return 1
 
   printf "%-23s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
+  echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
 }
 
-#show bookmark(use peco)
+#show list bookmark(use peco)
 __sh_bookmark::list ()
 {
-  local selectedBookmark=` \
-    cat ${SH_BOOKMARKS_FILE} | sort -n | \
-                        peco | rev     | \
-           cut -d "|" -f 1-1 | rev`
-
-  if [ -n "$selectedBookmark" ]; then
-    BUFFER=$BUFFER" ${selectedBookmark}"
-  fi
+  cat ${SH_BOOKMARKS_FILE} | sort -n | \
+                      peco | rev     | \
+         cut -d "|" -f 1-1 | rev
 }
 
 #reload bookmark (clean file)
@@ -105,12 +101,26 @@ __sh_bookmark::reload ()
   local tmpfile=$(mktemp)
   local bookmarkedPath=""
 
+  echo "start bookmark reload"
   while read line
   do
     bookmarkedPath=`echo ${line} | rev | cut -d "|" -f1-1 | rev | sed "s;^~;${HOME};"`
     if [ -d $bookmarkedPath ]; then
       echo $line >> $tmpfile
+    else
+      echo "  delete bookmark > "`echo ${line} | sed "s; *?\|;\|;"`
     fi
   done < ${SH_BOOKMARKS_FILE}
   command mv -f $tmpfile ${SH_BOOKMARKS_FILE}
+  echo "end bookmark reload"
+}
+
+#show selected bookmark
+__sh_bookmark::selected ()
+{
+  local selectedBookmark=`__sh_bookmark::list`
+
+  if [ -n "$selectedBookmark" ]; then
+    BUFFER=$BUFFER" ${selectedBookmark}"
+  fi
 }
