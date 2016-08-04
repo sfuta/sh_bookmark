@@ -95,6 +95,11 @@ __sh_bookmark::select ()
          cut -d "|" -f 1-1 | rev
 }
 
+#delete bookmark @TODO
+__sh_bookmark::delete ()
+{
+}
+
 #reload bookmark (clean file)
 __sh_bookmark::reload ()
 {
@@ -121,6 +126,11 @@ __sh_bookmark::selected ()
   local selectedBookmark=`__sh_bookmark::select`
 
   if [ -n "$selectedBookmark" ]; then
-    BUFFER=$BUFFER" ${selectedBookmark}"
+    if [ -z $1 ]; then
+      BUFFER=$BUFFER"${selectedBookmark}"
+    else
+      print -z "${selectedBookmark}"
+    fi
   fi
 }
+
