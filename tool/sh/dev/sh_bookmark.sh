@@ -12,7 +12,7 @@ SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 # @return formated path
 __sh_bookmark::normalizedPath ()
 {
-  if ! [ -d $1 ]; then
+  if ! [ -e $1 ]; then
     echo "no such file or directory" >&2;
     return 1;
   fi
@@ -41,9 +41,9 @@ __sh_bookmark::isExistId ()
 }
 
 #create bookmark id
-# 1. 最大20文字
-# 2. 各階層の先頭文字で作成(日本語の場合はローマ字)
-# 3. 名前が重複した場合はシーケンス番号を追加
+# 1.Max length:20
+# @TODO 2. 各階層の先頭文字で作成(日本語の場合はローマ字) 
+# 3.Add seq number to id, prevent of duplicate.
 #
 # @param  $1 bookmark path
 # @return bookmark id
@@ -65,7 +65,7 @@ __sh_bookmark::makeId ()
 #add bookmark
 #
 # @param  $1 save path(default current dir)
-# @param  $2 save id  (default see __sh_bookmark::makeId())
+# @param  $2 save id  (default auto create:See __sh_bookmark::makeId())
 # @return nothing
 __sh_bookmark::add ()
 {
@@ -87,8 +87,8 @@ __sh_bookmark::add ()
   echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
 }
 
-#show list bookmark(use peco)
-__sh_bookmark::list ()
+#show bookmark list and select(use peco)
+__sh_bookmark::select ()
 {
   cat ${SH_BOOKMARKS_FILE} | sort -n | \
                       peco | rev     | \
@@ -115,10 +115,10 @@ __sh_bookmark::reload ()
   echo "end bookmark reload"
 }
 
-#show selected bookmark
+#select bookmark function for command
 __sh_bookmark::selected ()
 {
-  local selectedBookmark=`__sh_bookmark::list`
+  local selectedBookmark=`__sh_bookmark::select`
 
   if [ -n "$selectedBookmark" ]; then
     BUFFER=$BUFFER" ${selectedBookmark}"
