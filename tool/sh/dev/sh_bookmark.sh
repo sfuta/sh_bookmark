@@ -5,8 +5,7 @@ SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 #create file to save bookmark data
 ! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
 
-#formated path ($HOME -> ~)
-# e.g. $HOME/workspace -> ~/workspace
+#formatted path ($HOME -> ~)
 #
 # @param  $1 path
 # @return formated path
@@ -90,14 +89,23 @@ __sh_bookmark::add ()
 #show bookmark list and select(use peco)
 __sh_bookmark::select ()
 {
-  cat ${SH_BOOKMARKS_FILE} | sort -n | \
-                      peco | rev     | \
-         cut -d "|" -f 1-1 | rev
+  local bookmarkLine=`cat ${SH_BOOKMARKS_FILE} | sort -n | peco`
+  case "-$1" in
+    "-id")   echo ${bookmarkLine} | cut -d "|" -f 1-1 | tr -d " ";;
+    "-path") echo ${bookmarkLine} | rev | cut -d "|" -f 1-1 | rev;;
+  esac
 }
 
-#delete bookmark @TODO
+#delete bookmark
 __sh_bookmark::delete ()
 {
+  local deleteBookmarkId=`__sh_bookmark::select id`
+  if [ -n "$deleteBookmarkId" ]; then
+    local tmpfile=`mktemp`
+    grep -vF "${deleteBookmarkId}" ${SH_BOOKMARKS_FILE} > $tmpfile
+    command cp -f $tmpfile ${SH_BOOKMARKS_FILE}
+    command rm -f $tmpfile
+  fi
 }
 
 #reload bookmark (clean file)
@@ -123,7 +131,7 @@ __sh_bookmark::reload ()
 #select bookmark function for command
 __sh_bookmark::selected ()
 {
-  local selectedBookmark=`__sh_bookmark::select`
+  local selectedBookmark=`__sh_bookmark::select path`
 
   if [ -n "$selectedBookmark" ]; then
     if [ -z $1 ]; then
