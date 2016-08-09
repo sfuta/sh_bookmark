@@ -42,13 +42,13 @@ __sh_bookmark::delete ()
   fi
 }
 
-#reload bookmark (clean file)
-__sh_bookmark::reload ()
+#refresh bookmark (clean file)
+__sh_bookmark::refresh ()
 {
   local tmpfile=`mktemp`
   local bookmarkedPath=""
 
-  echo "start bookmark reload"
+  echo "start bookmark refresh"
   while read line
   do
     bookmarkedPath=`echo ${line} | rev | cut -d "|" -f1-1 | rev | sed "s;^~;${HOME};"`
@@ -59,7 +59,7 @@ __sh_bookmark::reload ()
     fi
   done < ${SH_BOOKMARKS_FILE}
   command mv -f $tmpfile ${SH_BOOKMARKS_FILE}
-  echo "end bookmark reload"
+  echo "end bookmark refresh"
 }
 
 #select bookmark function for command
