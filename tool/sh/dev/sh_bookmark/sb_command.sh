@@ -68,7 +68,7 @@ __sh_bookmark::selected ()
   local selectedBookmark=`__sh_bookmark::select path`
 
   if [ -n "$selectedBookmark" ]; then
-    if [ -z $1 ]; then
+    if [ $0 = $SHELL ]; then
       BUFFER=$BUFFER"${selectedBookmark}"
     else
       print -z "${selectedBookmark}"
