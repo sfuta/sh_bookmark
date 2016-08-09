@@ -15,7 +15,11 @@ __sh_bookmark::normalizedPath ()
     echo "no such file or directory" >&2;
     return 1;
   fi
-  local bookmarkPath=`builtin cd $1 && pwd`
+  if [ -d $1 ]; then
+    local bookmarkPath=`builtin cd $1 && pwd`
+  else
+    local bookmarkPath=`pwd`"/$1"
+  fi
   local normalizedPath="";
 
   if echo ${bookmarkPath} | grep \"^${HOME}\" > /dev/null; then
