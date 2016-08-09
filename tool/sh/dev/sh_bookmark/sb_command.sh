@@ -21,7 +21,7 @@ __sh_bookmark::add ()
   fi
   [ -z $bookmarkId ] && return 1
 
-  printf "%-23s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
+  printf "%-18s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
   echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
 }
 
