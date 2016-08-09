@@ -44,7 +44,7 @@ __sh_bookmark::isExistId ()
 }
 
 #create bookmark id
-# 1.Max length:20
+# 1.Max length:15
 # @TODO 2. 各階層の先頭文字で作成(日本語の場合はローマ字) 
 # 3.Add seq number to id, prevent of duplicate.
 #
@@ -52,7 +52,7 @@ __sh_bookmark::isExistId ()
 # @return bookmark id
 __sh_bookmark::makeId ()
 {
-  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-20`
+  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-15`
   local counter=0
   while __sh_bookmark::isExistId "${pathInicial}:${counter}"
   do
