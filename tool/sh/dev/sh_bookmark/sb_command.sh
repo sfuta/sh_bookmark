@@ -17,9 +17,14 @@ __sh_bookmark::add ()
   if [ -z $2 ]; then
     local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
   else
-    local bookmarkId=`echo $2`
+    local bookmarkId=`echo $2 | tr -d " "`
   fi
   [ -z $bookmarkId ] && return 1
+
+  if grep -e "^${bookmarkId}" ${SH_BOOKMARKS_FILE}  >/dev/null ; then
+    echo "already,this bookmark id is registed:"${bookmarkId} >&2;
+    return 1;
+  fi
 
   printf "%-18s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
   echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
