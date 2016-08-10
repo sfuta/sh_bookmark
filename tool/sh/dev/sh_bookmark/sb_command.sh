@@ -40,6 +40,7 @@ __sh_bookmark::delete ()
     command cp -f $tmpfile ${SH_BOOKMARKS_FILE}
     command rm -f $tmpfile
   fi
+  echo "bookmark delete > ${deleteBookmarkId}"
 }
 
 #refresh bookmark (clean file)
@@ -60,6 +61,7 @@ __sh_bookmark::refresh ()
   done < ${SH_BOOKMARKS_FILE}
   command mv -f $tmpfile ${SH_BOOKMARKS_FILE}
   echo "end bookmark refresh"
+
 }
 
 #select bookmark function for command
@@ -68,7 +70,7 @@ __sh_bookmark::selected ()
   local selectedBookmark=`__sh_bookmark::select path`
 
   if [ -n "$selectedBookmark" ]; then
-    if [ $0 = $SHELL ]; then
+    if ! [ -z $WIDGET ]; then
       BUFFER=$BUFFER"${selectedBookmark}"
     else
       print -z "${selectedBookmark}"
