@@ -1,10 +1,5 @@
 #!/usr/local/bin/zsh
 
-SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
-
-#create file to save bookmark data
-! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
-
 #formatted path ($HOME -> ~)
 #
 # @param  $1 path
@@ -15,22 +10,15 @@ __sh_bookmark::normalizedPath ()
     echo "no such file or directory" >&2;
     return 1;
   fi
-  if [ -d $1 ]; then
-    local bookmarkPath=`builtin cd $1 && pwd`
-  else
-    local bookmarkPath=`pwd`"/$1"
-  fi
-  local normalizedPath="";
 
-  if echo ${bookmarkPath} | grep \"^${HOME}\" > /dev/null; then
-    normalizedPath=`echo ${bookmarkPath}`
-  else
-    normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`
-  fi
+  local bookmarkPath=`[ -d $1 ] && (builtin cd $1 && pwd) || echo $PWD"/$1"`
+  local normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`;
+
   if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep -Fx "${normalizedPath}" > /dev/null; then
     echo "already,this bookmark path is registed" >&2;
     return 1;
   fi
+
   echo ${normalizedPath}
 }
 

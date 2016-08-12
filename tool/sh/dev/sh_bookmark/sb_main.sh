@@ -1,5 +1,11 @@
 #!/usr/local/bin/zsh
 
+#set path to save bookmark
+SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
+
+#create file to save bookmark
+! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
+
 source `dirname $0`/sb_core.sh
 source `dirname $0`/sb_command.sh
 
