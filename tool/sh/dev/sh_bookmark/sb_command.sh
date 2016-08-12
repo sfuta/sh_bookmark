@@ -56,7 +56,7 @@ __sh_bookmark::refresh ()
   while read line
   do
     bookmarkedPath=`echo ${line} | cut -d "|" -f2- | cut -c2- | sed "s;^~;${HOME};"`
-    if [ -e $bookmarkedPath ]; then
+    if [ -e "$bookmarkedPath" ]; then
       echo $line >> $tmpfile
     else
       echo "  delete bookmark > "`echo ${line} | sed "s; *?\|;\|;"`
