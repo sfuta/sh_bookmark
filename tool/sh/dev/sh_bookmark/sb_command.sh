@@ -7,6 +7,8 @@
 # @return nothing
 __sh_bookmark::add ()
 {
+  ! [ -z $WIDGET ] && zle -I
+
   if [ -z $1 ]; then
     local bookmarkPath=`__sh_bookmark::normalizedPath $PWD`
   else
@@ -33,6 +35,8 @@ __sh_bookmark::add ()
 #delete bookmark
 __sh_bookmark::delete ()
 {
+  ! [ -z $WIDGET ] && zle -I
+
   local deleteBookmarkId=`__sh_bookmark::select id`
   if [ -n "$deleteBookmarkId" ]; then
     local tmpfile=`mktemp`
@@ -48,6 +52,8 @@ __sh_bookmark::refresh ()
 {
   local tmpfile=`mktemp`
   local bookmarkedPath=""
+
+  ! [ -z $WIDGET ] && zle -I
 
   echo "start bookmark refresh"
   while read line
