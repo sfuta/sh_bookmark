@@ -38,8 +38,9 @@ __sh_bookmark::delete ()
     grep -vF "${deleteBookmarkId}" ${SH_BOOKMARKS_FILE} > $tmpfile
     command cp -f $tmpfile ${SH_BOOKMARKS_FILE}
     command rm -f $tmpfile
+
+    echo "bookmark delete > ${deleteBookmarkId}"
   fi
-  echo "bookmark delete > ${deleteBookmarkId}"
 }
 
 #refresh bookmark (clean file)
