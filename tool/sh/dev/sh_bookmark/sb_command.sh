@@ -16,11 +16,9 @@ __sh_bookmark::add ()
   fi
   [ -z $bookmarkPath ] && return 1
 
-  if [ -z $2 ]; then
-    local bookmarkId=`__sh_bookmark::makeId $bookmarkPath`
-  else
-    local bookmarkId=`echo $2 | tr -d " "`
-  fi
+  local bookmarkBaseName=`[ -z $2 ] && basename $bookmarkPath || (echo $2 | tr -d " ")`
+  local bookmarkId=`__sh_bookmark::makeId $bookmarkBaseName`
+
   [ -z $bookmarkId ] && return 1
 
   if grep -e "^${bookmarkId}" ${SH_BOOKMARKS_FILE}  >/dev/null ; then

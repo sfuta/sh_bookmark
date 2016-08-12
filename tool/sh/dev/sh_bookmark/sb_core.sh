@@ -45,24 +45,23 @@ __sh_bookmark::isExistId ()
 
 #create bookmark id
 # 1.Max length:15
-# @TODO 2. 各階層の先頭文字で作成(日本語の場合はローマ字) 
-# 3.Add seq number to id, prevent of duplicate.
+# 2.Add seq number to id, prevent of duplicate.
 #
 # @param  $1 bookmark path
 # @return bookmark id
 __sh_bookmark::makeId ()
 {
-  local pathInicial=`echo "$1" | tr "/" "\n" | sed "s/\(^.\).*$/\1/" | tr -d "\n" | cut -c1-15`
+  local baseName=`echo "$1" | cut -c1-15`
   local counter=0
-  while __sh_bookmark::isExistId "${pathInicial}:${counter}"
+  while __sh_bookmark::isExistId "${baseName}:${counter}"
   do
     counter=`expr $counter + 1`
     if [ $counter -gt 99 ]; then
-      echo "too many similar id ${pathInicial}:n" >&2;
+      echo "too many similar id ${baseName}:n" >&2;
       return 1;
     fi
   done
-  echo "${pathInicial}:${counter}"
+  echo "${baseName}:${counter}"
 }
 
 #show bookmark list and select(use peco)
