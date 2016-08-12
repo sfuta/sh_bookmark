@@ -18,12 +18,12 @@ __sh_bookmark::add ()
 
   [ -z $bookmarkId ] && return 1
 
-  if grep -e "^${bookmarkId}" ${SH_BOOKMARKS_FILE}  >/dev/null ; then
+  if grep -e "^${bookmarkId}" ${SH_BOOKMARKS_FILE} >/dev/null; then
     echo "already,this bookmark id is registed:"${bookmarkId} >&2;
     return 1;
   fi
 
-  printf "%-18s|%s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
+  printf "%-18s| %s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
   echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
 }
 
@@ -54,7 +54,7 @@ __sh_bookmark::refresh ()
   echo "start bookmark refresh"
   while read line
   do
-    bookmarkedPath=`echo ${line} | rev | cut -d "|" -f1-1 | rev | sed "s;^~;${HOME};"`
+    bookmarkedPath=`echo ${line} | cut -d "|" -f2- | cut -c2- | sed "s;^~;${HOME};"`
     if [ -e $bookmarkedPath ]; then
       echo $line >> $tmpfile
     else

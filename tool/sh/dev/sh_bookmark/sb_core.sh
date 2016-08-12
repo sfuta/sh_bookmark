@@ -14,7 +14,7 @@ __sh_bookmark::normalizedPath ()
   local bookmarkPath=`[ -d $1 ] && (builtin cd $1 && pwd) || echo $PWD"/$1"`
   local normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`;
 
-  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep -Fx "${normalizedPath}" > /dev/null; then
+  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep -Fx " ${normalizedPath}" > /dev/null; then
     echo "already,this bookmark path is registed" >&2;
     return 1;
   fi
@@ -55,10 +55,10 @@ __sh_bookmark::makeId ()
 #show bookmark list and select(use peco)
 __sh_bookmark::select ()
 {
-  local bookmarkLine=`cat ${SH_BOOKMARKS_FILE} | sort -n | peco`
+  local selectLines=`cat ${SH_BOOKMARKS_FILE} | sort -n | peco --prompt="Bookmark>"`
   case "-$1" in
-    "-id")   echo ${bookmarkLine} | cut -d "|" -f 1-1 | tr -d " ";;
-    "-path") echo ${bookmarkLine} | rev | cut -d "|" -f 1-1 | rev;;
+    "-id")   echo ${selectLines} | awk 'BEGIN{FS=" "}{print $1}';;
+    "-path") echo ${selectLines} | cut -d "|" -f2- | cut -c2-;;
   esac
 }
 
