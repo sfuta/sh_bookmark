@@ -61,4 +61,3 @@ __sh_bookmark::select ()
     "-path") echo ${selectLines} | cut -d "|" -f2- | cut -c2-;;
   esac
 }
-

@@ -9,8 +9,9 @@ __sh_bookmark::add ()
 {
   ! [ -z $WIDGET ] && zle -I
 
-  local bookmarkPath=`[ -z $1 ] && __sh_bookmark::normalizedPath $PWD || \
-                                   __sh_bookmark::normalizedPath $1`
+  local savePath=`[ -z $1 ] && pwd || echo $1`
+  local bookmarkPath=`__sh_bookmark::normalizedPath $savePath`
+
   [ -z $bookmarkPath ] && return 1
 
   local bookmarkBaseName=`[ -z $2 ] && basename $bookmarkPath || (echo $2 | tr -d " ")`
