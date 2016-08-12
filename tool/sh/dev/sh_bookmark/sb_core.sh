@@ -39,7 +39,10 @@ __sh_bookmark::isExistId ()
 # @return bookmark id
 __sh_bookmark::makeId ()
 {
-  local baseName=`echo "$1" | cut -c1-15`
+  if ! echo $1 | grep -e "( |\|)" > /dev/null; then
+    echo "The unusable character remove from id. (' ', '|')" >&2
+  fi
+  local baseName=`echo "$1" | tr -d " |" | cut -c1-15`
   local counter=0
   while __sh_bookmark::isExistId "${baseName}:${counter}"
   do
