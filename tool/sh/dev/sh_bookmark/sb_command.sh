@@ -14,15 +14,10 @@ __sh_bookmark::add ()
 
   [ -z $bookmarkPath ] && return 1
 
-  local bookmarkBaseName=`[ -z $2 ] && basename $bookmarkPath || (echo $2 | tr -d " ")`
+  local bookmarkBaseName=`[ -z $2 ] && basename $bookmarkPath || echo $2`
   local bookmarkId=`__sh_bookmark::makeId $bookmarkBaseName`
 
   [ -z $bookmarkId ] && return 1
-
-  if grep -e "^${bookmarkId}" ${SH_BOOKMARKS_FILE} >/dev/null; then
-    echo "already,this bookmark id is registed:"${bookmarkId} >&2;
-    return 1;
-  fi
 
   printf "%-18s| %s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
   echo "bookmark add > ${bookmarkId}|${bookmarkPath}"

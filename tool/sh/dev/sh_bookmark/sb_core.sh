@@ -14,7 +14,7 @@ __sh_bookmark::normalizedPath ()
   local bookmarkPath=`[ -d $1 ] && (builtin cd $1 && pwd) || echo $PWD"/$1"`
   local normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`;
 
-  if cut -d "|" -f2 ${SH_BOOKMARKS_FILE} | grep -Fx " ${normalizedPath}" > /dev/null; then
+  if cut -d "|" -f2- ${SH_BOOKMARKS_FILE} | grep -Fx " ${normalizedPath}" > /dev/null; then
     echo "already,this bookmark path is registed" >&2;
     return 1;
   fi
@@ -28,7 +28,7 @@ __sh_bookmark::normalizedPath ()
 # @return nothing
 __sh_bookmark::isExistId ()
 {
-  cut -d "|" -f1 ${SH_BOOKMARKS_FILE} | tr -d " " | grep -Fx "$1" > /dev/null
+  awk 'BEGIN{FS=" "}{print $1}' ${SH_BOOKMARKS_FILE} | grep -Fx "$1" > /dev/null
 }
 
 #create bookmark id
@@ -39,7 +39,7 @@ __sh_bookmark::isExistId ()
 # @return bookmark id
 __sh_bookmark::makeId ()
 {
-  if ! echo $1 | grep -e "( |\|)" > /dev/null; then
+  if echo "$1" | command grep -e "[ |]" > /dev/null; then
     echo "The unusable character remove from id. (' ', '|')" >&2
   fi
   local baseName=`echo "$1" | tr -d " |" | cut -c1-15`
