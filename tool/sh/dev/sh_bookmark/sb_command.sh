@@ -70,13 +70,18 @@ __sh_bookmark::refresh ()
 #select bookmark function for command
 __sh_bookmark::selected ()
 {
-  local selectedBookmark=`__sh_bookmark::select path`
+  local selectedPath=`__sh_bookmark::select path`
 
-  if [ -n "$selectedBookmark" ]; then
+  if [ -n "$selectedPath" ]; then
+    local escapedPath=`echo ${selectedPath} | \
+                sed "s/\([\!#$%&'\"\\\`()=~|^\{\}[*?<> ]\)/\\\\\\\\\1/g" | \
+                sed "s/]/\\\\\]/g" | \
+                sed "s/^\\\\\~/~/"`
+
     if ! [ -z $WIDGET ]; then
-      BUFFER=$BUFFER"${selectedBookmark}"
+      BUFFER=$BUFFER"${escapedPath}"
     else
-      print -z "${selectedBookmark}"
+      print -z "${escapedPath}"
     fi
   fi
 }
