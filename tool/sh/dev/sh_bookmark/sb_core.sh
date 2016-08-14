@@ -28,7 +28,7 @@ __sh_bookmark::normalizedPath ()
 # @return nothing
 __sh_bookmark::isExistId ()
 {
-  awk 'BEGIN{FS=" "}{print $1}' ${SH_BOOKMARKS_FILE} | grep -Fx "$1" > /dev/null
+  cat ${SH_BOOKMARKS_FILE} | awk 'BEGIN{FS=" "}{print $1}' | grep -Fx "$1" > /dev/null
 }
 
 #create bookmark id
