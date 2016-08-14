@@ -37,7 +37,12 @@ __sh_bookmark::delete ()
 
     echo "start delete bookmarks"
     for deleteId in `echo $deleteIds | tr "\n" " "`; do
-      delLines=${delLines}" && NR!="`grep -n "^${deleteId}" ${SH_BOOKMARKS_FILE} | cut -d ":" -f1`
+
+      delLines=${delLines}" && NR!="`cat ${SH_BOOKMARKS_FILE}  | \
+                                awk 'BEGIN{FS=" "}{print $1}'  | \
+                                command grep -nF "${deleteId}" | \
+                                cut -d ":" -f1`
+
       echo "  bookmark delete > ${deleteId}"
     done
     delLines=`echo ${delLines} | cut -c5-`
