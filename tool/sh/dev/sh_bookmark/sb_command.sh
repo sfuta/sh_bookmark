@@ -28,14 +28,24 @@ __sh_bookmark::delete ()
 {
   ! [ -z $WIDGET ] && zle -I
 
-  local deleteBookmarkId=`__sh_bookmark::select id`
-  if [ -n "$deleteBookmarkId" ]; then
+  local deleteIds=`__sh_bookmark::select id`
+
+  if [ -n "$deleteIds" ]; then
+    #grep -vF "${deleteBookmarkId}" ${SH_BOOKMARKS_FILE} > $tmpfile
     local tmpfile=`mktemp`
-    grep -vF "${deleteBookmarkId}" ${SH_BOOKMARKS_FILE} > $tmpfile
+    local delLines=""
+
+    echo "start delete bookmarks"
+    for deleteId in `echo $deleteIds | tr "\n" " "`; do
+      delLines=${delLines}" && NR!="`grep -n "^${deleteId}" ${SH_BOOKMARKS_FILE} | cut -d ":" -f1`
+      echo "  bookmark delete > ${deleteId}"
+    done
+    delLines=`echo ${delLines} | cut -c5-`
+    cat  ${SH_BOOKMARKS_FILE} | awk "${delLines}" > $tmpfile
     command cp -f $tmpfile ${SH_BOOKMARKS_FILE}
     command rm -f $tmpfile
+    echo "end delete bookmarks"
 
-    echo "bookmark delete > ${deleteBookmarkId}"
   fi
 }
 
