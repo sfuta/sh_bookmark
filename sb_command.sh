@@ -6,8 +6,8 @@ SH_BOOKMARKS_FILE=${HOME}/.sh_bookmarks
 #create file to save bookmark
 ! [ -e ${SH_BOOKMARKS_FILE} ] && touch ${SH_BOOKMARKS_FILE}
 
-source `dirname $0`/sb_core_sub.sh
-source `dirname $0`/sb_core.sh
+source `dirname $0`/lib/sb_core_sub.sh
+source `dirname $0`/lib/sb_core.sh
 
 sh_bookmark ()
 {
