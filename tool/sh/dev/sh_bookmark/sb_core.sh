@@ -1,66 +1,98 @@
 #!/usr/local/bin/zsh
 
-#formatted path ($HOME -> ~)
+#add bookmark
 #
-# @param  $1 path
-# @return formated path
-__sh_bookmark::normalizedPath ()
-{
-  if ! [ -e $1 ]; then
-    echo "no such file or directory" >&2;
-    return 1;
-  fi
-
-  local bookmarkPath=`[ -d $1 ] && (builtin cd $1 && pwd) || echo $PWD"/$1"`
-  local normalizedPath=`echo ${bookmarkPath} | sed "s;^"${HOME}";~;"`;
-
-  if cut -d "|" -f2- ${SH_BOOKMARKS_FILE} | grep -Fx " ${normalizedPath}" > /dev/null; then
-    echo "already,this bookmark path is registed" >&2;
-    return 1;
-  fi
-
-  echo ${normalizedPath}
-}
-
-#exist check for bookmark id
-#
-# @param  $1 bookmark id
+# @param  $1 save path(default current dir)
+# @param  $2 save id  (default auto create:See __sh_bookmark::makeId())
 # @return nothing
-__sh_bookmark::isExistId ()
+__sh_bookmark::add ()
 {
-  cat ${SH_BOOKMARKS_FILE} | awk 'BEGIN{FS=" "}{print $1}' | grep -Fx "$1" > /dev/null
+  ! [ -z $WIDGET ] && zle -I
+
+  local savePath=`[ -z $1 ] && pwd || echo $1`
+  local bookmarkPath=`__sh_bookmark::normalizedPath $savePath`
+
+  [ -z $bookmarkPath ] && return 1
+
+  local bookmarkBaseName=`[ -z $2 ] && basename $bookmarkPath || echo $2`
+  local bookmarkId=`__sh_bookmark::makeId $bookmarkBaseName`
+
+  [ -z $bookmarkId ] && return 1
+
+  printf "%-18s| %s\n" ${bookmarkId} ${bookmarkPath} >> ${SH_BOOKMARKS_FILE}
+  echo "bookmark add > ${bookmarkId}|${bookmarkPath}"
 }
 
-#create bookmark id
-# 1.Max length:15
-# 2.Add seq number to id, prevent of duplicate.
-#
-# @param  $1 bookmark path
-# @return bookmark id
-__sh_bookmark::makeId ()
+#delete bookmark
+__sh_bookmark::delete ()
 {
-  if echo "$1" | command grep -e "[ |]" > /dev/null; then
-    echo "The unusable character remove from id. (' ', '|')" >&2
+  ! [ -z $WIDGET ] && zle -I
+
+  local deleteIds=`__sh_bookmark::select id`
+
+  if [ -n "$deleteIds" ]; then
+    #grep -vF "${deleteBookmarkId}" ${SH_BOOKMARKS_FILE} > $tmpfile
+    local tmpfile=`mktemp`
+    local delLines=""
+
+    echo "start delete bookmarks"
+    for deleteId in `echo $deleteIds | tr "\n" " "`; do
+
+      delLines=${delLines}" && NR!="`cat ${SH_BOOKMARKS_FILE}  | \
+                                awk 'BEGIN{FS=" "}{print $1}'  | \
+                                command grep -nF "${deleteId}" | \
+                                cut -d ":" -f1`
+
+      echo "  bookmark delete > ${deleteId}"
+    done
+    delLines=`echo ${delLines} | cut -c5-`
+    cat  ${SH_BOOKMARKS_FILE} | awk "${delLines}" > $tmpfile
+    command cp -f $tmpfile ${SH_BOOKMARKS_FILE}
+    command rm -f $tmpfile
+    echo "end delete bookmarks"
+
   fi
-  local baseName=`echo "$1" | tr -d " |" | cut -c1-15`
-  local counter=0
-  while __sh_bookmark::isExistId "${baseName}:${counter}"
-  do
-    counter=`expr $counter + 1`
-    if [ $counter -gt 99 ]; then
-      echo "too many similar id ${baseName}:n" >&2;
-      return 1;
-    fi
-  done
-  echo "${baseName}:${counter}"
 }
 
-#show bookmark list and select(use peco)
-__sh_bookmark::select ()
+#refresh bookmark (clean file)
+__sh_bookmark::refresh ()
 {
-  local selectLines=`cat ${SH_BOOKMARKS_FILE} | sort -n | peco --prompt="Bookmark>"`
-  case "-$1" in
-    "-id")   echo ${selectLines} | awk 'BEGIN{FS=" "}{print $1}';;
-    "-path") echo ${selectLines} | cut -d "|" -f2- | cut -c2-;;
-  esac
+  local tmpfile=`mktemp`
+  local bookmarkedPath=""
+
+  ! [ -z $WIDGET ] && zle -I
+
+  echo "start bookmark refresh"
+  while read line
+  do
+    bookmarkedPath=`echo ${line} | cut -d "|" -f2- | cut -c2- | sed "s;^~;${HOME};"`
+    if [ -e "$bookmarkedPath" ]; then
+      echo $line >> $tmpfile
+    else
+      echo "  delete bookmark > "`echo ${line} | sed "s; *?\|;\|;"`
+    fi
+  done < ${SH_BOOKMARKS_FILE}
+  command mv -f $tmpfile ${SH_BOOKMARKS_FILE}
+  echo "end bookmark refresh"
+
 }
+
+#select bookmark function for command
+__sh_bookmark::selected ()
+{
+  local selectedPath=`__sh_bookmark::select path`
+
+  if [ -n "$selectedPath" ]; then
+    local escapedPath=`echo ${selectedPath} | \
+                sed "s/\([\!#$%&'\"\\\`()=~|^\{\}[*?<> ]\)/\\\\\\\\\1/g" | \
+                sed "s/]/\\\\\]/g" | \
+                sed "s/^\\\\\~/~/"`
+
+    if ! [ -z $WIDGET ]; then
+      BUFFER=$BUFFER"${escapedPath}"
+    else
+      print -z "${escapedPath}"
+    fi
+  fi
+}
+
